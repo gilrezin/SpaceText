@@ -1,15 +1,16 @@
-
-  _________                       ___________              __   
- /   _____/__________    ____  ___\__    ___/___ ___  ____/  |_ 
- \_____  \\____ \__  \ _/ ___\/ __ \|    |_/ __ \\  \/  /\   __\
- /        \  |_> > __ \\  \__\  ___/|    |\  ___/ >    <  |  |  
-/_______  /   __(____  /\___  >___  >____| \___  >__/\_ \ |__|  
-        \/|__|       \/     \/    \/           \/      \/       
+░██████╗██████╗░░█████╗░░█████╗░███████╗████████╗███████╗██╗░░██╗████████╗
+██╔════╝██╔══██╗██╔══██╗██╔══██╗██╔════╝╚══██╔══╝██╔════╝╚██╗██╔╝╚══██╔══╝
+╚█████╗░██████╔╝███████║██║░░╚═╝█████╗░░░░░██║░░░█████╗░░░╚███╔╝░░░░██║░░░
+░╚═══██╗██╔═══╝░██╔══██║██║░░██╗██╔══╝░░░░░██║░░░██╔══╝░░░██╔██╗░░░░██║░░░
+██████╔╝██║░░░░░██║░░██║╚█████╔╝███████╗░░░██║░░░███████╗██╔╝╚██╗░░░██║░░░
+╚═════╝░╚═╝░░░░░╚═╝░░╚═╝░╚════╝░╚══════╝░░░╚═╝░░░╚══════╝╚═╝░░╚═╝░░░╚═╝░░░
 
 
 What is SpaceText?
 SpaceText is an open world adventure/tycoon game played entirely through the console. 
 Your goal is to explore the far away edges of the galaxy in order to obtain the resources that exist there.
+To play, simply follow the prompts on screen.
 
 This project is in very early stages. Many things currently do not work. There are a lot of bugs.
 If you want to play in this current stage, be sure to type "debug" in the console to get unlimited money and fuel.
+
