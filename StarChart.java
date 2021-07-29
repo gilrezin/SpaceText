@@ -162,7 +162,7 @@ public class StarChart {
       // combine corner parts together by stitching 4 quadrants together
       //System.out.println("Number of quadrants loaded: " + lines.size()); // sector debugging tool
       if (generateAdditionalSectors[5] || generateAdditionalSectors[6] || generateAdditionalSectors[7] || generateAdditionalSectors[8]) {
-         System.out.println(lines.size());
+         //System.out.println(lines.size());
          int index = 0;
          for (; index < lines.get(0).length; index++) {
             combine[index] = lines.get(0)[index] + lines.get(1)[index]; // combines top row

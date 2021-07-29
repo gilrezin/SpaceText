@@ -63,8 +63,8 @@ public class Space implements Comparable<Space>{
    }
 
    public int compareTo(Space other) { // compares space by their location in a given scan
-      return Comparator.comparing(Space::getSectorY).reversed().thenComparing(Space::getLocationY).thenComparing(Space::getLocationX).thenComparing(Space::getSectorX).compare(this, other);
-      //return Comparator.comparing(Space::getGalacticLocationY).thenComparing(Space::getGalacticLocationX).compare(this, other);
+      //return Comparator.comparing(Space::getSectorY).reversed().thenComparing(Space::getLocationY).thenComparing(Space::getLocationX).thenComparing(Space::getSectorX).compare(this, other); // deprecated, use only for testing
+      return Comparator.comparing(Space::getSectorY).reversed().thenComparing(Space::getLocationY).thenComparing(Space::getSectorX).thenComparing(Space::getLocationX).compare(this, other);
    }
 
 }

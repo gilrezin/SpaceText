@@ -245,6 +245,7 @@ public class Game {
                }
                contextMenu++;
                ship.travel(travelToSectorX, travelToSectorY, travelToX, travelToY, travelToPlanet); // set player location to new place
+               //System.out.println(ship.getCurrentSectorX() + " " + ship.getCurrentSectorY()); // enable for sector debugging
                if (getPlanet(travelToSectorX, travelToSectorY, travelToX, travelToY, travelToPlanet).isInhabited()) {
                   contextMenu = 3;
                } else {

@@ -63,8 +63,9 @@ public class SolarSystem extends Space {
          output += " ";
       }
       
-      //output += numOfPlanets + " Planets, Population: " + String.format("%.3g", population) + scale + extraSpace + " |\t"; // planet info text
-      output += numOfPlanets + " Planets " + getGalacticLocationX() + ", " + getGalacticLocationY() + " |\t"; // enable for location debugging
+      output += numOfPlanets + " Planets, Population: " + String.format("%.3g", population) + scale + extraSpace + " |\t"; // planet info text
+      //output += numOfPlanets + " Planets " + getGalacticLocationX() + ", " + getGalacticLocationY() + " |\t"; // enable for location debugging
+      //output += numOfPlanets + " Planets " + getGalacticLocationX() + ", " + getGalacticLocationY() + " (" + getLocationX() + ", " + getLocationY() + ") |\t"; // enable for location and sector debugging
       return output;
    }
 
