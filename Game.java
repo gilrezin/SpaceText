@@ -35,10 +35,12 @@ public class Game {
    private int selectedPart;
    private boolean nearbyPlanets;
    private boolean mostPopulousPlanets;
+   private boolean starlist;
    private Database help;
    private final String inhabitedPlanetText;
    private final String uninhabitedPlanetText;
    private final String incorrectInputText;
+   private String starlistText;
    private String travelMenuText;
    private Random random; // provides random values for use by other random objects
    //private int seed = ("q").hashCode();
@@ -49,9 +51,10 @@ public class Game {
       //this.starChart = new StarChart("" + random.nextDouble(), ship.getCurrentSectorX(), ship.getCurrentSectorY()); // generate world and pass on a seed to StarChart's random variable
       this.contextMenu = 0;
       this.help = new Database(0); // get data for help menus
-      this.inhabitedPlanetText = "\n1. Shop  2. Nearby Planets  3. Leave  4. Refuel  5. Ship";
-      this.uninhabitedPlanetText = "\n1. Colony  2. Nearby Planets  3. Leave";
-      this.incorrectInputText = "Type the number corresponding to the option you want to select.";
+      this.inhabitedPlanetText = "\n1. Shop  2. Nearby Planets  3. Leave  4. Refuel  5. Ship  6. Starlist";
+      this.uninhabitedPlanetText = "\n1. Colony  2. Nearby Planets  3. Leave  4. Starlist";
+      this.incorrectInputText = "Type the letter/number corresponding to the option you want to select.";
+      this.starlistText = "\n\n+. Add current planet to Starlist  -. Back";
       //this.travelMenuText = starChart.generateSectorMap(ship.getCurrentSectorX(), ship.getCurrentSectorY(), ship.getLocationX(), ship.getLocationY()) + "\n\nWhere to?\nType \"+\" for most populous planets in this sector"; // display travel menu within sector
    }
    
@@ -100,6 +103,10 @@ public class Game {
                   contextMenu = 6;
                   return starChart.getMostPopulousPlanets(ship.getLocationX(), ship.getLocationY());
                }
+               if (starlist) {
+                  contextMenu = 19;
+                  return starChart.getStarlist(ship.getGalacticLocationX(), ship.getGalacticLocationY()) + starlistText;
+               }
                contextMenu--; // go back to planet list
                return getSolarSystem(travelToSectorX, travelToSectorY, travelToX, travelToY).toString() + "\n\n" + getSolarSystem(travelToSectorX, travelToSectorY, travelToX, travelToY).getPlanetList();
             case 10:
@@ -109,7 +116,11 @@ public class Game {
             case 15:
                contextMenu = 10; // go back to menu
                return "1. Buy  2. Sell  3. Exit";
-            case 13:
+            case 13: // back out of spare parts menu
+            case 19: // back out of starlist menu
+               if (starlist) {
+                  starlist = false;
+               }
                if (getCurrentPlanet().isInhabited()) {
                   contextMenu = 4;
                   return getCurrentPlanet() + ship.toString() + inhabitedPlanetText;
@@ -180,6 +191,9 @@ public class Game {
                case "5":
                   contextMenu = 13;
                   return ship.getPartList();
+               case "6":
+                  contextMenu = 19;
+                  return starChart.getStarlist(ship.getGalacticLocationX(), ship.getGalacticLocationY()) + starlistText;
 
                default:
                   return incorrectInputText;
@@ -251,14 +265,19 @@ public class Game {
                } else {
                   contextMenu = 8;
                }
+               starlist = false;
                this.travelMenuText = starChart.generateSectorMap(ship.getCurrentSectorX(), ship.getCurrentSectorY(), ship.getLocationX(), ship.getLocationY()) + "\n\nWhere to?\nType \"+\" for most populous planets in this sector"; // update travel menu to display new position
                return "You head for the planet " + getPlanet(travelToX, travelToY, travelToPlanet).getName() + " in the solar system " + getSolarSystem(travelToX, travelToY).getName() + ".\n\n";
             } else if (input.equalsIgnoreCase("n")) {
+               contextMenu--; // go back to planet list
                if (mostPopulousPlanets) {
-                  contextMenu = 6;
                   return starChart.getMostPopulousPlanets(ship.getLocationX(), ship.getLocationY());
                }
-               contextMenu--; // go back to planet list
+               if (starlist) {
+                  contextMenu = 19;
+                  return starChart.getStarlist(ship.getGalacticLocationX(), ship.getGalacticLocationY()) + starlistText;
+
+               }
                return getSolarSystem(travelToSectorX, travelToSectorY, travelToX, travelToY).toString() + "\n\n" + getSolarSystem(travelToSectorX, travelToSectorY, travelToX, travelToY).getPlanetList();
             } else {
                return incorrectInputText;
@@ -277,8 +296,12 @@ public class Game {
                case "3":
                   contextMenu = 5; // travel menu
                   return travelMenuText;
+               case "4":
+                  contextMenu = 19;
+                  return starChart.getStarlist(ship.getGalacticLocationX(), ship.getGalacticLocationY()) + starlistText;
                default:
                   return incorrectInputText;
+
             }
          case 10: // shop menu
             switch (input) {
@@ -390,9 +413,38 @@ public class Game {
          case 18: // ask player for seed before beginning
             contextMenu = 1;
             return "Please enter a seed for world generation.";
+         case 19: // Starlist menu (bookmarks for easy travel)
+            starlist = true;
+            switch(input) {
+               case "+": // add to Starlist
+                  starChart.addToStarlist(ship.getLocationX(), ship.getLocationY(), ship.getCurrentPlanet());
+                  return starChart.getStarlist(ship.getGalacticLocationX(), ship.getGalacticLocationY()) + starlistText;
+               case "-": // back
+                  contextMenu = 4;
+                  starlist = false;
+                  return getCurrentPlanet() + ship.toString() + inhabitedPlanetText;
+               default:
+                  try {
+                     this.travelToSectorX = starChart.getStarlistAtIndex(Integer.parseInt(input)).getGalacticLocationX() / 21;
+                     this.travelToSectorY = starChart.getStarlistAtIndex(Integer.parseInt(input)).getGalacticLocationY() / -21;
+                     this.travelToX = starChart.getStarlistAtIndex(Integer.parseInt(input)).getGalacticLocationX() - (travelToSectorX * 21) + 10;
+                     this.travelToY = starChart.getStarlistAtIndex(Integer.parseInt(input)).getGalacticLocationY() - (travelToSectorY * 21) + 10;
+                     this.travelToPlanet = starChart.getStarlistAtIndex(Integer.parseInt(input)).getPlanetIndex() + 1;
+                     travelDistance = ((float) Math.sqrt(Math.pow(starChart.getStarlistAtIndex(Integer.parseInt(input)).getGalacticLocationX() - ship.getGalacticLocationX(), 2) + Math.pow(starChart.getStarlistAtIndex(Integer.parseInt(input)).getGalacticLocationY() - ship.getGalacticLocationY(), 2)));
+                     String distanceUnit = " light years ";
+                     if (travelDistance == 1.0) {
+                        distanceUnit = " light year ";
+                     }
+                     contextMenu = 7;
+                     return "Travel to:\nSolar System " + getSolarSystem(travelToSectorX, travelToSectorY, travelToX, travelToY).getName() + "\nPlanet " + getPlanet(travelToSectorX, travelToSectorY, travelToX, travelToY, travelToPlanet).getName() + "\n" + travelDistance + distanceUnit + "away" + "\nYou will use " + ((1 * ship.getActivePart(0).getFuelEfficiency()) * travelDistance + "L of fuel\n(y/n)"); //returns solar system name, planet name, and distance using distance formula
+                  }
+                  catch (Exception IllegalArgumentException) {
+                     contextMenu = 19;
+                     return incorrectInputText;
+                  }
+            }
          default:
             return null;
-
       }
    }
    
@@ -431,5 +483,6 @@ public class Game {
    
    public Planet getCurrentPlanet() {
       return getSector(ship.getCurrentSectorX(), ship.getCurrentSectorY()).getSpace(ship.getLocationX(), ship.getLocationY()).getPlanet(ship.getCurrentPlanet());
-   }   
+   }
+
 }

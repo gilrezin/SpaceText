@@ -11,7 +11,7 @@ public class SolarSystem extends Space {
       this.numOfPlanets = random.nextInt(6) + 2; // 2-7 planets
       this.planets = new ArrayList<Planet>();
       for (int i = 0; i < numOfPlanets; i++) {
-         planets.add(new Planet(generateName(random), i, random)); // create planets
+         planets.add(new Planet(generateName(random), i, random, sectorX * 21 + locationX - 10, sectorY * -21 + locationY - 10)); // create planets
       }
    }
    

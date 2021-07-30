@@ -10,8 +10,13 @@ public class Planet implements Comparable<Planet> {
    private float population;
    private Part[] partsToPurchase;
    private Resource resource;
+   private int galacticLocationX;
+   private int galacticLocationY;
+
    
-   public Planet(String name, int index, Random random) {
+   public Planet(String name, int index, Random random, int galacticLocationX, int galacticLocationY) {
+      this.galacticLocationX = galacticLocationX;
+      this.galacticLocationY = galacticLocationY;
       this.planetIndex = index;
       this.name = name;
       this.size = (float) random.nextInt(2000) + 20; // surface area in millions of square kilometers
@@ -81,6 +86,14 @@ public class Planet implements Comparable<Planet> {
    
    public boolean isInhabited() {
       return inhabited;
+   }
+
+   public int getGalacticLocationX() {
+      return galacticLocationX;
+   }
+
+   public int getGalacticLocationY() {
+      return galacticLocationY;
    }
    
    public String toString() {

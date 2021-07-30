@@ -159,4 +159,5 @@ public class PlayerShip {
       credits -= (int) (maxFuelRange - fuelRange); // cost to refuel (1 credit per light year)
       fuelRange = maxFuelRange;
    }
+
 }

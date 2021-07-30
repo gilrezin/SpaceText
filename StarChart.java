@@ -9,6 +9,7 @@ public class StarChart {
    private String seed;
    private ArrayList<SolarSystem> systems;
    private TreeMap<Planet, Space> planets; // map containing the most populous solar systems in a given scan
+   private ArrayList<Planet> Starlist;
    public StarChart(String seed, int startingLocationX, int startingLocationY) {
       this.random = new Random(); // creates random variable to be used by world generation
       this.random.setSeed(seed.hashCode());
@@ -17,6 +18,7 @@ public class StarChart {
       starChart = new HashMap<>();
       starChart.put(new AbstractMap.SimpleEntry(startingLocationX, startingLocationY), new Sector(true, seed, startingLocationX, startingLocationY));
       systems = new ArrayList<>(); // ArrayList tracking viewable solar systems in every new sector map
+      Starlist = new ArrayList<>();
    }
 
    public Sector getSector(int x, int y) { // returns the designated Sector
@@ -284,7 +286,7 @@ public class StarChart {
 
       for (int i = 1; i < planets.size(); i++) { // adds to list
          float distance = ((float) Math.sqrt(Math.pow(entryArray[i].getValue().getLocationX() - locationX, 2) + Math.pow(entryArray[i].getValue().getLocationY() - locationY, 2)));
-         output += "\n- " + distance + " light years away -" + " \n" + (11 - i) + ": " + entryArray[i].getKey() + "\n";
+         output += "\n- " + distance + " light years away -\n" + (11 - i) + ": " + entryArray[i].getKey() + "\n";
       }
       return output;
    }
@@ -298,6 +300,33 @@ public class StarChart {
       output[2] = entryArray[11 - index].getKey().getPlanetIndex() + 1; // 2 is planet index in solar system
 
       return output;
+   }
+
+   public String getStarlist(int x, int y) {
+      String output = "";
+      int index = 1;
+      if (Starlist.size() == 0) {
+         output += "-------------------------\nNothing added to Starlist\n-------------------------";
+      }
+      for (Planet p : Starlist) {
+         float distance = ((float) Math.sqrt(Math.pow(p.getGalacticLocationX() - x, 2) + Math.pow(p.getGalacticLocationY() - y, 2))); // distance formula (x2 is the new galactic location, x1 is the old one)
+         output += "\n- " + distance + " light years away -\n" + index + ": " + p.toString() + "\n";
+         index++;
+      }
+      return output;
+   }
+
+   public Planet getStarlistAtIndex(int input) {
+      return Starlist.get(input - 1);
+   }
+
+   public void addToStarlist(int x, int y, int planet) {
+      for (SolarSystem s : systems) {
+         if (s.getLocationX() == x) { // finds the SolarSystem that aligns with the current coordinates, then saves those coordinates to Starlist
+            Starlist.add(s.getPlanet(planet));
+            break;
+         }
+      }
    }
 
    
