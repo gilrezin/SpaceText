@@ -1,5 +1,9 @@
 // class containing player data
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 public class PlayerShip {
    private int currentPlanet;
    private int locationX; // location within a chunk
@@ -9,6 +13,8 @@ public class PlayerShip {
    private int credits;
    private float fuelRange; // fuel level in light years
    private float maxFuelRange; // max fuel range in light years
+   private float amountGatheredThisSession; // amount gathered in one mining session
+   private TreeMap<Resource, Float> resourcesGathered = new TreeMap<>(); // TreeMap of all resources mined and their amounts
    private ArrayList<Part> activeParts;
    private ArrayList<Part> spareParts;
    
@@ -20,17 +26,19 @@ public class PlayerShip {
       this.currentSectorY = 0;
       this.credits = credits;
       this.activeParts = new ArrayList<Part>();
-      /* active parts consists of 3 parts:
+      /* active parts consists of 4 parts:
       0. Thruster (Engine)
       1. Blaster (Weapons)
       2. Shield
+      3. Fuel Cell
       */
       this.activeParts.add(new Thruster(300, 1));
       this.activeParts.add(new Blaster(100, 40));
       this.activeParts.add(new Shield(60));
+      this.activeParts.add(new FuelCell(32));
       this.spareParts = new ArrayList<Part>();
-      this.fuelRange = 8;
-      this.maxFuelRange = 8;
+      this.fuelRange = activeParts.get(3).getCapacity();
+      this.maxFuelRange = this.fuelRange;
    }
    
    public int getCurrentPlanet() { // get current planet
@@ -107,10 +115,16 @@ public class PlayerShip {
       else if (spareParts.get(index) instanceof Shield) {
          activeIndex = 2;
       }
+      else if (spareParts.get(index) instanceof FuelCell) {
+         activeIndex = 3;
+      }
       spareParts.add(activeParts.get(activeIndex)); // adds old part to spare parts
       activeParts.remove(activeIndex);
       activeParts.add(activeIndex, spareParts.get(index)); // adds new part to active parts
       spareParts.remove(index);
+      if (activeIndex == 3) {
+         this.maxFuelRange = activeParts.get(3).getCapacity();
+      }
 
    }
 
@@ -158,6 +172,56 @@ public class PlayerShip {
    public void refuel() { // refuels ship
       credits -= (int) (maxFuelRange - fuelRange); // cost to refuel (1 credit per light year)
       fuelRange = maxFuelRange;
+   }
+
+   public void mine(int duration, TreeMap<Resource, Float> resourcesThisSession) {
+      this.fuelRange -= 0.25 * duration;
+      this.amountGatheredThisSession = 0;
+      boolean sameResource = false;
+      Set<Map.Entry<Resource, Float>> entrySet = resourcesThisSession.entrySet(); // uses entryset to allow the TreeMap to be used in a for each loop
+      for (Map.Entry<Resource, Float> currentResource : entrySet) {
+         amountGatheredThisSession += currentResource.getValue(); // amends the amount of resource gathered in the mining session
+         Set<Map.Entry<Resource, Float>> entrySet2 = resourcesGathered.entrySet(); // compares every resource just collected to ones already stored
+         for (Map.Entry<Resource, Float> storedResource : entrySet2) {
+            if (storedResource.getKey() == currentResource.getKey()) {
+               resourcesGathered.put(storedResource.getKey(), storedResource.getValue() + currentResource.getValue()); // if duplicate resource, add their amounts together
+               sameResource = true; // if the resource is the same, do not add it as a new resource in the TreeMap
+            }
+         }
+         if (!sameResource) { // if mined a new resource, add it to the list
+            resourcesGathered.put(currentResource.getKey(), currentResource.getValue());
+         }
+         sameResource = false;
+      }
+      if (resourcesGathered.size() == 0) { // if no resources have been gathered yet
+         this.resourcesGathered = resourcesThisSession;
+      }
+   }
+
+   public float getChangeInResourcesGathered() {
+      return amountGatheredThisSession;
+   }
+
+
+   public String getAmountOfResourcesGathered() { // body of text equivalent to getTotalAmountOfResourcesGathered()
+      String output = "Current Resources Gathered:\n";
+      Set<Map.Entry<Resource, Float> > entrySet = resourcesGathered.entrySet(); // uses entryset to allow the TreeMap to be used in a for each loop
+      for (Map.Entry<Resource, Float> currentResource : entrySet) {
+         output += currentResource.getKey().getElementName() + ": " + currentResource.getValue() + "kg\n";
+      }
+      if (resourcesGathered.size() == 0) {
+         output += "Nothing yet";
+      }
+      return output;
+   }
+
+   public float getValueOfResourcesGathered() {
+      float output = 0;
+      Set<Map.Entry<Resource, Float> > entrySet = resourcesGathered.entrySet(); // uses entryset to allow the TreeMap to be used in a for each loop
+      for (Map.Entry<Resource, Float> currentResource : entrySet) {
+         output += currentResource.getKey().getElementValue() * currentResource.getValue();
+      }
+      return output;
    }
 
 }

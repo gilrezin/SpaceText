@@ -11,7 +11,6 @@ public class Part implements Comparable<Part> {
    public Part(int durability, Random random) { // new parts
       this.durability = durability;
       this.fullDurability = this.durability;
-
       this.value = (int) ((random.nextDouble() * 0.5 + 0.5) * this.fullDurability); // new part value formula
       this.newValue = value; // sets used and new values for parts
       this.usedValue = newValue - (fullDurability / 3);
@@ -32,10 +31,21 @@ public class Part implements Comparable<Part> {
       this.usedValue = value; // sets used and new values for parts
       this.newValue = usedValue + (fullDurability / 3);
    }
+
+   public Part(float value) { // for indestructable parts
+      this.value = (int) value;
+      this.durability = -1;
+      this.fullDurability = -1;
+      this.usedValue = this.value;
+      this.newValue = this.value;
+   }
+
    
    public void use(int value) { // decrease  durability by a set amount
-      this.durability -= value;
-      this.value = this.usedValue; // reduce value in part if used
+      if (this.fullDurability > -1) { // if part is destructable
+         this.durability -= value;
+         this.value = this.usedValue; // reduce value in part if used
+      }
    }
 
    public void repair() { // sets durability to initial value;
@@ -69,7 +79,9 @@ public class Part implements Comparable<Part> {
       while (output.length() < 25) { // spacing for formatting
          output += " ";
       }
-      output += "Durability: " + this.durability + "/" + this.fullDurability;
+      if (fullDurability > -1) {
+         output += "Durability: " + this.durability + "/" + this.fullDurability;
+      }
       while (output.length() < 70) { // spacing for formatting
          output += " ";
       }
@@ -84,4 +96,6 @@ public class Part implements Comparable<Part> {
       }
 
       public float getFuelEfficiency() { return 0; }
+
+      public float getCapacity() { return 0; }
 }

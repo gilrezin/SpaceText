@@ -21,6 +21,7 @@
  */
 import java.util.HashMap;
 import java.util.Random;
+import java.util.TreeMap;
 
 public class Game {
    private StarChart starChart;
@@ -36,12 +37,15 @@ public class Game {
    private boolean nearbyPlanets;
    private boolean mostPopulousPlanets;
    private boolean starlist;
+   private final int totalNumberOfColonies = 5;
+   private int numberOfColonies;
    private Database help;
    private final String inhabitedPlanetText;
    private final String uninhabitedPlanetText;
    private final String incorrectInputText;
-   private String starlistText;
+   private final String starlistText;
    private String travelMenuText;
+   private final String colonyMenuText;
    private Random random; // provides random values for use by other random objects
    //private int seed = ("q").hashCode();
    private int seed;
@@ -54,7 +58,8 @@ public class Game {
       this.inhabitedPlanetText = "\n1. Shop  2. Nearby Planets  3. Leave  4. Refuel  5. Ship  6. Starlist";
       this.uninhabitedPlanetText = "\n1. Colony  2. Nearby Planets  3. Leave  4. Starlist";
       this.incorrectInputText = "Type the letter/number corresponding to the option you want to select.";
-      this.starlistText = "\n\n+. Add current planet to Starlist  -. Back";
+      this.starlistText = "\n\n+. Add/Remove current planet to Starlist  -. Back";
+      this.colonyMenuText = "1. Mine  2. Trade Route  3. Remove Colony  4. Back";
       //this.travelMenuText = starChart.generateSectorMap(ship.getCurrentSectorX(), ship.getCurrentSectorY(), ship.getLocationX(), ship.getLocationY()) + "\n\nWhere to?\nType \"+\" for most populous planets in this sector"; // display travel menu within sector
    }
    
@@ -65,9 +70,12 @@ public class Game {
       if (input.equalsIgnoreCase("help")) { // back button
             return help.get(contextMenu);
          }
-      if (input.equalsIgnoreCase("debug")) {
-         ship.setMaxFuelRange(99999);
+      if (input.equalsIgnoreCase("debug m")) {
          ship.addCredits(99999);
+         return "debug mode enabled";
+      }
+      if (input.equalsIgnoreCase("debug f")) {
+         ship.setMaxFuelRange(99999);
          return "debug mode enabled";
       }
       if (input.equalsIgnoreCase("location")) {
@@ -83,6 +91,7 @@ public class Game {
          switch(contextMenu) {
             case 5:
             case 17:
+            case 21:
                if (getCurrentPlanet().isInhabited()) {
                   contextMenu = 4;
                   return getCurrentPlanet() + ship.toString() + inhabitedPlanetText;
@@ -177,7 +186,7 @@ public class Game {
                case "3":
                   contextMenu = 5; // travel menu
                   return travelMenuText;
-               case "4":
+               case "4": // refuel menu
                   if (ship.getFuelLevel() / ship.getMaxFuelLevel() == 1.0) {
                      return "Ship is already fueled!";
                   } else {
@@ -188,10 +197,10 @@ public class Game {
                         return "Price: 1 Credit/light year\nYou will be charged " + ((int) (ship.getMaxFuelLevel() - ship.getFuelLevel())) + " Credits.\nOk? (y/n)"; // refuel text
                      }
                   }
-               case "5":
+               case "5": // ship menu
                   contextMenu = 13;
                   return ship.getPartList();
-               case "6":
+               case "6": // starlist
                   contextMenu = 19;
                   return starChart.getStarlist(ship.getGalacticLocationX(), ship.getGalacticLocationY()) + starlistText;
 
@@ -287,9 +296,15 @@ public class Game {
             return getCurrentPlanet() + ship.toString() + uninhabitedPlanetText; // info text
          case 9: // player response to colony stop menu
             switch (input) {
-               case "1":
-                  // colony menu, add contextMenu pointer value later
-                  return "No options yet";
+               case "1": // colony menu
+                  if (!getCurrentPlanet().isColony()) { // set up colony if first time
+                     contextMenu = 20;
+                     return "There is no colony set up here. Would you like to create one? (y/n)\n\n- Resource Details -\n\n" + getCurrentPlanet().getResourceDetails();
+                  }
+                  else {
+                     contextMenu = 21;
+                     return ship.getAmountOfResourcesGathered() + "\n" + this.colonyMenuText;
+                  }
                case "2":
                   contextMenu = 17; // nearby planets menu
                   return getCurrentSolarSystem().getPlanetList(ship.getCurrentPlanet()); // solar system info & display previous info again
@@ -443,6 +458,65 @@ public class Game {
                      return incorrectInputText;
                   }
             }
+         case 20: // set up colony
+            switch(input) {
+               case "y":
+                  if (numberOfColonies < totalNumberOfColonies) {
+                     getCurrentPlanet().createColony();
+                     numberOfColonies++;
+                     contextMenu++;
+                     return "Colony created!\n\n" + ship.getAmountOfResourcesGathered() + "\n" + this.colonyMenuText;
+                  }
+               case "n":
+                  contextMenu = 9;
+                  return getCurrentPlanet() + ship.toString() + uninhabitedPlanetText;
+               default:
+                  return incorrectInputText;
+            }
+         case 21: // colony menu
+            switch(input) {
+               case "1": // Mine for resources
+                  contextMenu = 23;
+                  return "Mine for how many days? (0.25L/day)";
+               case "2": // trade routes WIP
+                  return "not implemented yet";
+               case "3": // removes a colony
+                  contextMenu++;
+                  return "Are you sure? (y/n)";
+               case "4": // back
+                  contextMenu = 9;
+                  return getCurrentPlanet() + ship.toString() + uninhabitedPlanetText;
+               default:
+                  return incorrectInputText;
+            }
+         case 22: // remove colony menu
+            switch(input) {
+               case "y":
+                  getCurrentPlanet().removeColony();
+                  numberOfColonies--;
+                  contextMenu = 9;
+                  return getCurrentPlanet() + ship.toString() + uninhabitedPlanetText;
+               case "n":
+                  contextMenu--;
+                  return ship.getAmountOfResourcesGathered() + "\n" + colonyMenuText;
+            }
+         case 23:
+            try {
+               if (0.25 * Double.parseDouble(input) > ship.getFuelLevel()) {
+                  return "You don't have enough fuel! You need " + (0.25 * Double.parseDouble(input)) + "L. Fuel level is " + ship.getFuelLevel() + "L"; // display not enough fuel message
+               }
+               ship.mine(Integer.parseInt(input), getCurrentPlanet().mine(Integer.parseInt(input)));
+               float amountMined = ship.getChangeInResourcesGathered();
+               contextMenu++;
+               return "You mined for " + input + " days.\nYou obtained " + amountMined + "kg of resources";
+            }
+            catch(Exception IllegalArgumentException) {
+               return incorrectInputText;
+            }
+         case 24:
+            contextMenu = 21;
+            return ship.getAmountOfResourcesGathered() + "\n" + colonyMenuText;
+
          default:
             return null;
       }

@@ -1,6 +1,6 @@
 // class that represents a planet in solar system
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
+
 public class Planet implements Comparable<Planet> {
    private String name;
    int planetIndex;
@@ -9,9 +9,10 @@ public class Planet implements Comparable<Planet> {
    private boolean inhabited;
    private float population;
    private Part[] partsToPurchase;
-   private Resource resource;
+   private TreeMap<Float, Resource>  resources; // resources on a planet and their given percent of composition in the planet's ground
    private int galacticLocationX;
    private int galacticLocationY;
+   private boolean isColony;
 
    
    public Planet(String name, int index, Random random, int galacticLocationX, int galacticLocationY) {
@@ -22,27 +23,57 @@ public class Planet implements Comparable<Planet> {
       this.size = (float) random.nextInt(2000) + 20; // surface area in millions of square kilometers
       this.temperature = (float) (random.nextInt(900) - 273.15);
       this.inhabited = random.nextDouble() < 0.5; // returns random true or false
+      this.isColony = false;
       if (inhabited) {
          this.population = (float) (random.nextDouble() * (size * 30) / (Math.abs(temperature) / 30) + 1); // population in millions of people (set up so that the larger the planet and the closer to 0C, the higher the population)
-         resource = null;
+         resources = null;
       }
       else {
-         resource = new Resource(5, random); // create new resource
+         resources = new TreeMap<>(Comparator.reverseOrder()); // creating a resource map of the resources and the percent that can be mined from the planet
+         float percentages = 1;
+         float nextFloat = random.nextFloat();
+         ArrayList<String> resourcesInPlanet = new ArrayList<>(); // duplicate detection list
+         boolean removedResource = false; // checker for if a resource has passed the duplication check or not
+         while (percentages > 0.005) {
+            nextFloat = random.nextFloat();
+            while (nextFloat > percentages) { // add more elements to the planet until less than 5% is remaining
+               nextFloat = random.nextFloat();
+            }
+
+            percentages -= nextFloat; // subtracts percentages of elements until none is left
+            double distanceFromStart = galacticLocationX + galacticLocationY;
+            resources.put(nextFloat, new Resource(distanceFromStart, random)); // add elements into the table
+            if (resourcesInPlanet.size() != 0) {
+               for (String s : resourcesInPlanet) {
+                  if (resources.get(nextFloat).getElementName().equals(s)) { // detects duplicate resources in a planet and removes them
+                     resources.remove(nextFloat);
+                     removedResource = true;
+                     break;
+                  }
+               }
+            }
+            if (!removedResource) {
+               resourcesInPlanet.add(resources.get(nextFloat).getElementName()); // adds to the list after passing the duplicate check
+            }
+            removedResource = false;
+         }
       }
-      
       if (population > 1000) { // if population is more than 1 billion, sell new parts. Otherwise, sell used parts
          partsToPurchase = new Part[(int) (random.nextDouble() * population / 1000 * (random.nextDouble() * 5 + 1))]; // number of parts available is influenced by population
          for (int i = 0; i < partsToPurchase.length; i++) {
             int randomValue = random.nextInt(100);
             int randomDurability = (int) (random.nextDouble() * random.nextInt(950) + 50);
-            if (randomValue < 33) { // add Thruster
+            if (randomValue < 25) { // add Thruster
                partsToPurchase[i] = new Thruster(randomDurability, random); // part durability randomized between 50-500
             } // add Shield
-            else if (randomValue < 66) {
+            else if (randomValue < 50) {
                partsToPurchase[i] = new Shield(randomDurability, random);
             } // add Blaster
-            else {
+            else if (randomValue < 75) {
                partsToPurchase[i] = new Blaster(randomDurability, random);
+            }
+            else {
+               partsToPurchase[i] = new FuelCell ((float) randomDurability, random);
             }
          }
       }
@@ -95,6 +126,56 @@ public class Planet implements Comparable<Planet> {
    public int getGalacticLocationY() {
       return galacticLocationY;
    }
+
+   public boolean isColony() {
+      return isColony;
+   }
+
+   public void createColony() {
+      isColony = true;
+   }
+
+   public void removeColony() {
+      isColony = false;
+   }
+
+   public float getAmountMined(int duration) { // mines planet for resources, then returns how much was mined
+      float output = 0;
+      Set<Map.Entry<Float, Resource> > entrySet = resources.entrySet(); // uses entryset to allow the TreeMap to be used in a for each loop
+      for (Map.Entry<Float, Resource> currentResource : entrySet) {
+         output +=  50 * duration * (currentResource.getKey() * currentResource.getValue().getElementValue()); // formula for the amount of a resource mined in kg (10 kg mined in a day)
+      }
+      return output;
+   }
+
+   public TreeMap<Resource, Float> mine(int duration) {
+      TreeMap<Resource, Float> output = new TreeMap<>();
+      Set<Map.Entry<Float, Resource> > entrySet = resources.entrySet(); // uses entryset to allow the TreeMap to be used in a for each loop
+      for (Map.Entry<Float, Resource> currentResource : entrySet) {
+         output.put(currentResource.getValue(), 50 * duration * (currentResource.getKey() * currentResource.getValue().getElementValue())); // formula for the amount of a resource mined in kg (10 kg mined in a day)
+      }
+      return output;
+   }
+
+   public TreeMap<Float, String> sortByValue() { // takes resources map and sorts the elements within by value
+      TreeMap<Float, String> output = new TreeMap<>(Comparator.reverseOrder());
+      Set<Map.Entry<Float, Resource> > entrySet = resources.entrySet(); // uses entryset to allow the TreeMap to be used in a for each loop
+      for (Map.Entry<Float, Resource> currentEntry : entrySet) {
+         output.put(currentEntry.getValue().getElementValue(), currentEntry.getValue().getElementName());
+      }
+      return output;
+   }
+
+   public String getResourceDetails() {
+      String output = "";
+      String percentOfResources;
+      Set<Map.Entry<Float, Resource> > entrySet = resources.entrySet(); // uses entryset to allow the TreeMap to be used in a for each loop
+      for (Map.Entry<Float, Resource> currentEntry : entrySet) {
+         percentOfResources = String.format("%.4g", currentEntry.getKey() * 100);
+         output += percentOfResources + "% " + currentEntry.getValue() + "\n"; // gets percent and resource and turns it into a readable format
+      }
+      return output;
+   }
    
    public String toString() {
       String inhabitedString;
@@ -109,7 +190,9 @@ public class Planet implements Comparable<Planet> {
 
       }
       else {
-         inhabitedString = "Uninhabited\nContains high concentrations of " + resource.getElementName();
+         TreeMap<Float, String> values = sortByValue();
+         String valueOfFirstEntry = "" + values.firstEntry(); // displays the most valuable resource from the planet
+         inhabitedString = "Uninhabited\nContains concentrations of " + valueOfFirstEntry.substring(valueOfFirstEntry.indexOf("=") + 1);
       }
       
       String sizeString = size + " million"; // displays the correct units
