@@ -18,12 +18,19 @@
 15: shop sell menu
 16: sell items message
 17: Nearby Planets menu
+18: Ask player for world seed
+19: Starlist menu
+20: set up colony
+21: colony menu
+22: remove colony menu
+23: mine menu
+24: mine result
+25: sell resources
  */
-import java.util.HashMap;
+import java.io.Serializable;
 import java.util.Random;
-import java.util.TreeMap;
 
-public class Game {
+public class Game implements Serializable {
    private StarChart starChart;
    private PlayerShip ship;
    private int contextMenu; // tells Menu object which text to display
@@ -47,6 +54,7 @@ public class Game {
    private String travelMenuText;
    private final String colonyMenuText;
    private Random random; // provides random values for use by other random objects
+   private boolean newGame; // remains true for a new game, is disabled after tutorial text
    //private int seed = ("q").hashCode();
    private int seed;
    
@@ -60,6 +68,7 @@ public class Game {
       this.incorrectInputText = "Type the letter/number corresponding to the option you want to select.";
       this.starlistText = "\n\n+. Add/Remove current planet to Starlist  -. Back";
       this.colonyMenuText = "1. Mine  2. Trade Route  3. Remove Colony  4. Back";
+      this.newGame = true;
       //this.travelMenuText = starChart.generateSectorMap(ship.getCurrentSectorX(), ship.getCurrentSectorY(), ship.getLocationX(), ship.getLocationY()) + "\n\nWhere to?\nType \"+\" for most populous planets in this sector"; // display travel menu within sector
    }
    
@@ -142,7 +151,8 @@ public class Game {
                contextMenu--;
                return ship.getPartList();
             case 16:
-               contextMenu--;
+            case 25:
+               contextMenu = 15;
                return "1. Parts  2. Resources  3. Exit";
 
          }
@@ -150,7 +160,12 @@ public class Game {
 
       switch (contextMenu) {
          case 0: // Title screen
-            contextMenu = 18; // send to seed menu
+            if (newGame) {
+               contextMenu = 18; // send to seed menu
+            }
+            else {
+               contextMenu = 2; // send to returning game menu
+            }
             return "\\\\SpaceText//\nA game by Gil Rezin\nPress Enter to begin.";
 
          case 1: // Tutorial and initializing world
@@ -159,9 +174,9 @@ public class Game {
             this.starChart = new StarChart("" + random.nextDouble(), ship.getCurrentSectorX(), ship.getCurrentSectorY()); // generate world and pass on a seed to StarChart's random variable
             this.travelMenuText = starChart.generateSectorMap(ship.getCurrentSectorX(), ship.getCurrentSectorY(), ship.getLocationX(), ship.getLocationY()) + "\n\nWhere to?\nType \"+\" for most populous planets in this sector"; // display travel menu within sector
             contextMenu++;
-            return "Welcome to SpaceText! You are a small interplanetary mining contractor. Your work consists of bringing rare materials from uninhabited worlds to habited ones for a profit.\nYour goal should be to make as much money as possible.\nIf you get stuck, type \"help\" for assistance.";
+            return "Welcome to SpaceText! You are a small interplanetary mining contractor. Your work consists of bringing rare materials from uninhabited worlds to habited ones for a profit.\nYour goal should be to make as much money as possible.\nIf you get stuck, type \"help\" for assistance.\nRemember to type \"save\" to save your progress. Save often!";
 
-         case 2: // Beginning planet text
+         case 2: // Beginning or returning planet text
             String inhabitedString = "inhabited";
             if (getCurrentPlanet().isInhabited()) {
                contextMenu = 3;
@@ -169,7 +184,11 @@ public class Game {
                inhabitedString = "uninhabited";
                contextMenu = 8;
             }
-            return "You begin your journey on the " + inhabitedString + " planet " + getCurrentPlanet().getName() + " in the Solar System " + getCurrentSolarSystem().getName() + ", near the center of the galaxy."; // location info
+            if (newGame) {
+               newGame = false;
+               return "You begin your journey on the " + inhabitedString + " planet " + getCurrentPlanet().getName() + " in the Solar System " + getCurrentSolarSystem().getName() + ", near the center of the galaxy."; // location info
+            }
+            return "You continue your journey on the " + inhabitedString + " planet " + getCurrentPlanet().getName() + " in the Solar System " + getCurrentSolarSystem().getName() + "."; // location info
 
          case 3: // trading stop menu
             contextMenu++;
@@ -396,7 +415,8 @@ public class Game {
                   contextMenu = 16;
                   return ship.getPartList().substring(ship.getPartList().indexOf("Spare Parts")); // return ship part list without active parts
                case "2": // sell materials
-                  return "Nothing here yet, work in progress";
+                  contextMenu = 25;
+                  return ship.getAmountOfResourcesGathered() + "\n\n+. Sell all";
                case "3":
                   contextMenu = 10; // go back to menu
                   return "1. Buy  2. Sell  3. Exit";
@@ -500,7 +520,7 @@ public class Game {
                   contextMenu--;
                   return ship.getAmountOfResourcesGathered() + "\n" + colonyMenuText;
             }
-         case 23:
+         case 23: // mine menu
             try {
                if (0.25 * Double.parseDouble(input) > ship.getFuelLevel()) {
                   return "You don't have enough fuel! You need " + (0.25 * Double.parseDouble(input)) + "L. Fuel level is " + ship.getFuelLevel() + "L"; // display not enough fuel message
@@ -513,20 +533,31 @@ public class Game {
             catch(Exception IllegalArgumentException) {
                return incorrectInputText;
             }
-         case 24:
+         case 24: // mining result
             contextMenu = 21;
             return ship.getAmountOfResourcesGathered() + "\n" + colonyMenuText;
+         case 25: // sell resources
+            int value;
+            if (input.equals("+")) { // sells all resources
+               value = (int) Math.ceil(ship.getValueOfResourcesGathered());
+               ship.sellAllResources();
 
+            }
+            else {
+               value = ship.sellResource(input);
+            }
+
+            if (value > 0) {
+               return ship.getAmountOfResourcesGathered() + "\n\nSold! +" + value + " Credits";
+            }
+            else {
+               return "type the element you wish to sell, or type + to sell all. Type back to go back";
+            }
          default:
             return null;
       }
    }
-   
 
-   
-   
-   
-   
    public Sector getSector(int x, int y) {
       return starChart.getSector(x, y);
    }
@@ -559,4 +590,7 @@ public class Game {
       return getSector(ship.getCurrentSectorX(), ship.getCurrentSectorY()).getSpace(ship.getLocationX(), ship.getLocationY()).getPlanet(ship.getCurrentPlanet());
    }
 
+   public void setContextMenu(int newValue) {
+      contextMenu = newValue;
+   }
 }

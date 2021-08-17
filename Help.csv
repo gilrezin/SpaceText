@@ -12,3 +12,11 @@
 14,"1. Equip" allows you to change the part that is currently in use.&n"2. Repair" allows you to repair a used part for a given cost.&n"3. Back" returns you to the previous menu.&nType the number corresponding to the option you would like to select, or type "back" to go back.
 15,"1. Parts" allows you to sell your spare parts.&n"2. Resources" allows you to sell your resources obtained from your colonies.&n"3. Exit" returns you to the previous menu.&nType the number corresponding to the option you would like to select, or type "back" to go back.
 16,Type the number corresponding to the part you would like to sell, or type "back" to go back.
+17,These are the planets located within this solar system. Type the number corresponding to the planet you would like to travel to, or type "back" to go back.
+19,This is the Starlist, a way to easily bookmark planets to easily travel back to later. Type + to add/remove the planet you are currently on to Starlist, type the number corresponding to the planet you would like to travel to (if a planet has been added to Starlist), or type - or "back" to go back.
+20,Type "y" for yes or "n" for no.
+21,This is your colony. On this menu, you can see your collected resources.&n"1. Mine" is where you can mine for resources that can be sold at an inhabited planet.&n"2. Trade routes" is where you can automate the process of travelling between planets to sell resources (not currently implemented).&n"3. Remove Colony" is where you can remove the colony you are currently at (you can only have up to 5 colonies at one time).&nType 4 or "back to go back".
+22,Type "y" for yes or "n" for no.
+23,Enter a number for how many days you would like to mine resources for.
+24,Press enter to continue.
+25,Here is where you can sell resources. At the top is your gathered resources. type the element you wish to sell, or type + to sell all. Type back to go back.

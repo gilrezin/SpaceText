@@ -1,9 +1,9 @@
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Random;
-import java.lang.Math;
 
 // class used by sectors to create a grid
-public class Space implements Comparable<Space>{
+public class Space implements Comparable<Space>, Serializable {
    private int locationX;
    private int locationY;
    private int sectorX;

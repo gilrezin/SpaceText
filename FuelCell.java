@@ -1,6 +1,7 @@
+import java.io.Serializable;
 import java.util.Random;
 
-public class FuelCell extends Part {
+public class FuelCell extends Part implements Serializable {
     private float capacity;
 
     public FuelCell (float value) { // for default parts

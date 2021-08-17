@@ -1,9 +1,10 @@
 // class used to read csv files from disk
 import java.io.File;
+import java.io.Serializable;
 import java.util.Scanner;
 import java.util.HashMap;
 
-public class Database {
+public class Database implements Serializable {
     private HashMap<Integer, String> map;
 
     public Database(int index) {

@@ -1,7 +1,8 @@
 // represents the various resources found within a planet
+import java.io.Serializable;
 import java.util.Random;
 
-public class Resource implements Comparable<Resource>{
+public class Resource implements Comparable<Resource>, Serializable {
     private Database elementValues; // represents element in periodic table and its value
     private Database elementNames; // represents element in periodic table and name of element
     String elementName;

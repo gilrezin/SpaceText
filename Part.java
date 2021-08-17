@@ -1,7 +1,8 @@
+import java.io.Serializable;
 import java.util.Random;
 
 // superclass for parts that can be replaced on the ship.
-public class Part implements Comparable<Part> {
+public class Part implements Comparable<Part>, Serializable {
    private final int fullDurability; // set max durability
    private int durability; // set current durability
    private int value; // value of part

@@ -1,8 +1,9 @@
 //class representing one sector in starChart. Is made up of type Space and solarSystem.
+import java.io.Serializable;
 import java.util.*;
 
 
-public class Sector {
+public class Sector  implements Serializable {
    private Space[][] grid; // sector grid
    private ArrayList<Space> solarSystems; // list of solar systems in the region
    private TreeMap<Planet, Space> planets; // map containing the most populous solar systems in a given sector

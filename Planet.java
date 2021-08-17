@@ -1,7 +1,8 @@
 // class that represents a planet in solar system
+import java.io.Serializable;
 import java.util.*;
 
-public class Planet implements Comparable<Planet> {
+public class Planet implements Comparable<Planet>, Serializable {
    private String name;
    int planetIndex;
    private float size;

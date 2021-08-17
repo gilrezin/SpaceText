@@ -1,7 +1,8 @@
+import java.io.Serializable;
 import java.util.Random;
 
 // subclass of Part, engine that runs ship
-public class Thruster extends Part {
+public class Thruster extends Part implements Serializable {
     private final float fuelEfficiency; // Coefficient for amount of fuel it takes to go one light year. Default is 1
 
     public Thruster (int durability, float fuelEfficiency, Random random) { // new part

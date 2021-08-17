@@ -1,10 +1,11 @@
 // class containing player data
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-public class PlayerShip {
+public class PlayerShip implements Serializable {
    private int currentPlanet;
    private int locationX; // location within a chunk
    private int locationY;
@@ -220,6 +221,26 @@ public class PlayerShip {
       Set<Map.Entry<Resource, Float> > entrySet = resourcesGathered.entrySet(); // uses entryset to allow the TreeMap to be used in a for each loop
       for (Map.Entry<Resource, Float> currentResource : entrySet) {
          output += currentResource.getKey().getElementValue() * currentResource.getValue();
+      }
+      return output;
+   }
+
+   public int sellAllResources() { // sells all resources
+      addCredits((int) getValueOfResourcesGathered());
+      resourcesGathered.clear();
+      return (int) Math.ceil(getValueOfResourcesGathered());
+   }
+
+   public int sellResource(String input) { // sells a resource given the resource name
+      int output = 0;
+      Set<Map.Entry<Resource, Float> > entrySet = resourcesGathered.entrySet(); // uses entryset to allow the TreeMap to be used in a for each loop
+      for (Map.Entry<Resource, Float> currentResource : entrySet) {
+         if (input.equalsIgnoreCase(currentResource.getKey().elementName)) { // checks for if entered resource exists
+            addCredits((int) Math.ceil(currentResource.getValue())); // adds credits to balance, then removes the resource
+            output += (int) Math.ceil(currentResource.getValue());
+            resourcesGathered.remove(currentResource.getKey());
+            break;
+         }
       }
       return output;
    }

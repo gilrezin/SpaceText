@@ -1,7 +1,8 @@
+import java.io.Serializable;
 import java.util.Random;
 
 // subclass of Part, weapon systems on ship
-public class Blaster extends Part {
+public class Blaster extends Part implements Serializable {
     private final int firepower; // Amount of damage ship can do to others
 
     public Blaster (int durability, int firepower, Random random) {

@@ -1,9 +1,10 @@
 // Chart keeping track of every visited sector
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.Map.Entry;
 
-public class StarChart {
+public class StarChart implements Serializable {
    private HashMap<Entry<Integer, Integer>, Sector> starChart;
    private Random random;
    private String seed;
